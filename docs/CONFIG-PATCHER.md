@@ -28,6 +28,12 @@ When you update NeoWX Material to a new version, you face a dilemma:
 
 ## 🚀 Quick Start
 
+Use the Python environment running WeeWX. The paths here assume a package
+installation; for pip, use your station's `skins/neowx-material` directory.
+The MQTT mapping examples with names such as `outTemp_C` assume a publisher
+that supplies those names. For the MQTTPublish configuration in the
+[MQTT guide](MQTT.md), use the matching unsuffixed mappings from that guide.
+
 ### 1. Run the Patcher
 
 ```bash
@@ -35,10 +41,8 @@ When you update NeoWX Material to a new version, you face a dilemma:
 cd /etc/weewx/skins/neowx-material
 
 # Apply your patch
-./config_patcher.py skin.conf skin.conf.patch
-
-# Or with explicit Python interpreter
 python3 config_patcher.py skin.conf skin.conf.patch
+
 ```
 
 ### 2. Restart WeeWX
@@ -65,7 +69,7 @@ weectl extension install https://github.com/weewx-packages/catalog/releases/down
 cd /etc/weewx/skins/neowx-material
 
 # 3. Apply your custom settings
-./config_patcher.py skin.conf skin.conf.patch
+python3 config_patcher.py skin.conf skin.conf.patch
 
 # 4. Restart WeeWX
 sudo systemctl restart weewx
@@ -111,34 +115,22 @@ The patcher reads your **patch file** (e.g., `skin.conf.patch`) and applies only
 - ✅ **Comments** - Preserved from original file
 - ⚠️ **Deletions** - Settings not in patch file remain unchanged
 
-> ⚠️ **`[[[sections]]]` is a section, not a value - it merges, it doesn't replace.**
-> A `[[[[cards]]]]` block in your patch merges INTO the shipped `[[[[cards]]]]`
-> block (so patching its `items` replaces that section's item list exactly,
-> as you'd expect). But a section id that ISN'T one of the shipped ones is
-> merged in as a brand-new, *additional* section - it does not take over an
-> existing panel, and its items get de-duplicated away if a shipped section
-> already lists them (items are first-occurrence-wins, in section order).
-> Always reuse one of the nine shipped ids to override a panel:
-> `card`, `external_sensors`, `chart`, `custom_charts`, `additional_charts`,
-> `external_sensor_charts`, `other_charts`, `telemetry_cards`,
-> `telemetry_charts`.
-> `merge_configs` has no delete path, so a patch cannot remove a shipped
-> section outright. You can still **suppress** one without touching
-> `skin.conf`: override its `items` with an empty value, and the section is
-> skipped because a section with no items never renders. To drop the
-> `external_sensors` panel, patch it to nothing:
->
-> ```ini
-> [Extras]
->   [[Appearance]]
->     [[[sections]]]
->       [[[[external_sensors]]]]
->         items =
-> ```
->
-> The section node survives in the merged config but produces no output, and
-> its former items are left for later sections to claim, since a skipped
-> section never enters the de-duplication set.
+The patcher merges sections by name. To change an existing panel, use its
+name from the installed `skin.conf`. Version 1.73.4 ships `cards`,
+`additional_cards`, `external_sensors_cards`, `charts`, `additional_charts`,
+`external_sensor_charts`, `telemetry_cards` and `telemetry_charts`.
+A new section name adds a panel rather than replacing an existing one.
+Ordinary items can appear in several panels; `forecast` renders once per page.
+The patcher has no section deletion operation. To hide a panel, give it an
+empty item list:
+
+```ini
+[Extras]
+    [[Appearance]]
+        [[[sections]]]
+            [[[[external_sensors_cards]]]]
+                items =
+```
 
 ---
 
@@ -325,7 +317,7 @@ Fill in only the values you've changed from defaults:
         [[[sections]]]
             [[[[cards]]]]
                 items = forecast, outTemp, outHumidity, barometer, windSpeed
-            [[[[custom_charts]]]]
+            [[[[charts]]]]
                 items = outTemp, windSpeed, barometer, rain
                 title = Custom Charts
                 content = chart
@@ -338,7 +330,7 @@ Fill in only the values you've changed from defaults:
 cp skin.conf skin.conf.backup
 
 # Apply the patch
-./config_patcher.py skin.conf skin.conf.patch
+python3 config_patcher.py skin.conf skin.conf.patch
 
 # Check the result
 cat skin.conf | grep "color ="
@@ -392,7 +384,7 @@ cat skin.conf | grep "custom1_label"
         [[[sections]]]
             [[[[cards]]]]
                 items = forecast, outTemp, outHumidity, barometer, windSpeed, rain, UV
-            [[[[custom_charts]]]]
+            [[[[charts]]]]
                 items = outTemp, barometer, windSpeed, rain, windDir
                 title = Custom Charts
                 content = chart
@@ -433,8 +425,8 @@ cat skin.conf | grep "custom1_label"
             barometer = "barometer_mbar", " hPa", 1
             windSpeed = "windSpeed_kph", " km/h", 0
             windGust = "windGust_kph", " km/h", 1
-            rain = "dayRain_cm", " mm", 1
-            rainRate = "rainRate_cm_per_hour", " mm/h", 2
+            rain = "dayRain_cm", " cm", 1
+            rainRate = "rainRate_cm_per_hour", " cm/h", 2
             UV = "UV", "", 1
 ```
 
@@ -541,7 +533,7 @@ The patcher will leave all other settings untouched.
 3. **Apply your patch:**
    ```bash
    cd /etc/weewx/skins/neowx-material
-   ./config_patcher.py skin.conf skin.conf.patch
+   python3 config_patcher.py skin.conf skin.conf.patch
    ```
 
 4. **Review changes:**
@@ -717,13 +709,13 @@ Here's a complete example patch file with common customizations:
 
         # Card and chart order (with forecast enabled). [[[sections]]] must
         # come after every other [[Appearance]] setting above, and each
-        # [[[[...]]]] id below must be one of the shipped ids (here: card,
-        # custom_charts) so it overrides that panel instead of being
-        # appended as an unused extra section - see "What Gets Patched?".
+        # [[[[...]]]] id below must be one of the shipped ids (here: cards,
+        # charts) so it overrides that panel instead of being
+        # added as a separate panel. See "What Gets Patched?".
         [[[sections]]]
             [[[[cards]]]]
                 items = forecast, outTemp, outHumidity, barometer, windSpeed, rain, UV, radiation
-            [[[[custom_charts]]]]
+            [[[[charts]]]]
                 items = outTemp, barometer, windSpeed, windDir, rain, UV, radiation, outHumidity
                 title = Custom Charts
                 content = chart
@@ -775,8 +767,8 @@ Here's a complete example patch file with common customizations:
             barometer = "barometer_mbar", " hPa", 1
             windSpeed = "windSpeed_kph", " km/h", 0
             windGust = "windGust_kph", " km/h", 1
-            rain = "dayRain_cm", " mm", 1
-            rainRate = "rainRate_cm_per_hour", " mm/h", 2
+            rain = "dayRain_cm", " cm", 1
+            rainRate = "rainRate_cm_per_hour", " cm/h", 2
             UV = "UV", "", 1
 
 [Labels]
@@ -793,7 +785,7 @@ Here's a complete example patch file with common customizations:
 
 ```bash
 # Apply this patch
-./config_patcher.py skin.conf skin.conf.patch
+python3 config_patcher.py skin.conf skin.conf.patch
 
 # Restart WeeWX
 sudo systemctl restart weewx
@@ -811,16 +803,14 @@ sudo systemctl restart weewx
 ### Patcher Script Location
 
 - **Installed location:** `/etc/weewx/skins/neowx-material/config_patcher.py`
-- **Executable:** Make sure it has execute permissions (`chmod +x config_patcher.py`)
+- Use the Python interpreter from WeeWX's environment; execute permission is not required.
 
 ### Command Syntax
 
 ```bash
 # Basic syntax
-./config_patcher.py <source_file> <patch_file>
-
-# With Python interpreter
 python3 config_patcher.py <source_file> <patch_file>
+
 
 # Full paths
 python3 /etc/weewx/skins/neowx-material/config_patcher.py \
@@ -872,7 +862,7 @@ If you encounter issues:
 The Configuration Patcher enables **effortless updates** while preserving your customizations:
 
 ✅ Create a `skin.conf.patch` file with only your changes
-✅ Run `./config_patcher.py skin.conf skin.conf.patch` after updates
+✅ Run `python3 config_patcher.py skin.conf skin.conf.patch` after updates
 ✅ Restart WeeWX and enjoy your personalized configuration
 
 **Never manually reconfigure your weather station again!** 🎉

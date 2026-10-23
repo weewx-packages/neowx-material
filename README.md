@@ -5,9 +5,11 @@ interactive ApexCharts, history tables, telemetry pages, translated labels and
 light/dark themes. Optional browser MQTT updates use a WebSocket broker;
 Open-Meteo forecasts use your station coordinates.
 
-This independently maintained distribution is version 1.73.4, based on
-[seehase/neowx-material](https://github.com/seehase/neowx-material) and the
+This repository mirrors
+[seehase/neowx-material](https://github.com/seehase/neowx-material), based on the
 original [Neoground skin](https://github.com/neoground/neowx-material).
+The fixed catalog archive below supplies version 1.73.4 with its original
+fonts and assets. Documentation is maintained separately from the source mirror.
 The catalog declares WeeWX 5.x and Python 3.10 or newer.
 
 ## Install and activate
