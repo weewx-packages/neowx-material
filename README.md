@@ -18,18 +18,21 @@ Use an existing WeeWX station with working archive reports. The base skin
 uses the Python libraries already supplied with WeeWX. You do not need
 Node.js to install the published assets.
 
+For a pip installation, activate the existing virtual environment that runs
+your WeeWX service before running these commands. Both `python` and `weectl`
+must come from that environment. For a distribution package installation, use
+its `weectl`, with `sudo` if required. Add `--config /path/to/weewx.conf` to the
+extension command when your station configuration is not found automatically.
+
 Install the published archive with WeeWX 5's extension installer:
 
 ```sh
 weectl extension install https://github.com/weewx-packages/catalog/releases/download/neowx-material/v1.73.4/neowx-material-1.73.4.zip
 ```
 
-Use the `weectl` from your WeeWX environment. Add
-`--config /path/to/weewx.conf` when the station configuration is not found
-automatically. Package installations may require `sudo`; activate the WeeWX
-virtual environment for pip installations. Restart your WeeWX service after
-configuration, for example `sudo systemctl restart weewx` on systemd.
-The installer does not restart it for you.
+Restart your WeeWX service after configuration, for example
+`sudo systemctl restart weewx` on systemd. The installer does not restart it
+for you.
 
 The installer copies `skins/neowx-material` and the search-list modules
 `historygenerator`, `openmeteo`, `updatecheck`, `onlinecheck` and `panelorder`
@@ -86,9 +89,19 @@ settings, but does not replace backups. Uninstall with
 
 ## Build styles from source
 
-From `skins/neowx-material`, install the dependencies in its `package.json`.
-Run `npm run build-css` and `npm run build-minify-css`, or use the shipped
-Yarn `build` script. These commands rebuild Sass styles, not the WeeWX reports.
+To rebuild the styles, install Git and Node.js with npm, then download the
+source into an empty working directory:
+
+```sh
+git clone --depth 1 https://github.com/weewx-packages/neowx-material.git
+cd neowx-material/skins/neowx-material
+npm install
+npm run build-css
+npm run build-minify-css
+```
+
+These commands rebuild Sass styles. Installing the published skin does not
+require this build.
 
 ## License and credits
 

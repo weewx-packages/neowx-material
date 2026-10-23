@@ -14,15 +14,18 @@ The fixed archive in this example is Rich Bell's MQTTPublish 1.2.0. Its
 configuration is `[MQTTPublish]`, separate from Matthew Wall's older
 `[StdRESTful][[MQTT]]` publisher configuration.
 
-Use the Python environment running WeeWX:
+For a pip installation, activate the existing virtual environment running
+your WeeWX service first. Use its `python` and `weectl` for both commands.
+For a Debian or Raspberry Pi OS package installation, use
+`sudo apt install python3-paho-mqtt` instead of the pip command, then use the
+package installation's `weectl`, with `sudo` if required. Add
+`--config /path/to/weewx.conf` to the extension command when needed.
 
 ```sh
-python -m pip install paho-mqtt
+python -m pip install 'paho-mqtt'
 weectl extension install https://github.com/weewx-packages/catalog/releases/download/mqtt-publish/v1.2.0/mqtt-publish-1.2.0.tar.gz
 ```
 
-Add `--config /path/to/weewx.conf` when needed. Package installations may
-require `sudo`; activate WeeWX's virtual environment for pip installations.
 The installer registers `user.mqttpublish.MQTTPublish` in `restful_services`.
 Its service and example topic start disabled. The skin is installed separately
 as described in the [README](../README.md#install-and-activate).

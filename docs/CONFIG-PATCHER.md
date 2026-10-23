@@ -28,13 +28,26 @@ When you update NeoWX Material to a new version, you face a dilemma:
 
 ## 🚀 Quick Start
 
-Use the Python environment running WeeWX. The paths here assume a package
-installation; for pip, use your station's `skins/neowx-material` directory.
+Install the skin using the [README](../README.md#install-and-activate) first.
+For a pip installation, activate the existing virtual environment running
+WeeWX before using the patcher. The paths here assume a package installation;
+for pip, use your station's installed `skins/neowx-material` directory.
 The MQTT mapping examples with names such as `outTemp_C` assume a publisher
 that supplies those names. For the MQTTPublish configuration in the
 [MQTT guide](MQTT.md), use the matching unsuffixed mappings from that guide.
 
 ### 1. Run the Patcher
+
+Before your first run, create `skin.conf.patch` from the shipped sample and
+edit it for your station. From the installed skin directory:
+
+```sh
+cd /etc/weewx/skins/neowx-material
+test -e skin.conf.patch || cp skin.conf.patch.sample skin.conf.patch
+```
+
+Edit `skin.conf.patch` before applying it. Keep your existing patch when
+upgrading. Then run the patcher:
 
 ```bash
 # From the skin directory
