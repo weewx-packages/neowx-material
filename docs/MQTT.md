@@ -228,17 +228,18 @@ The [weewx-mqtt extension](https://github.com/matthewwall/weewx-mqtt) publishes 
 
 ### Installation
 
-#### WeeWX 5.x (Python 3)
+For the separate MQTT publisher, follow its current installation and configuration
+instructions. The catalog's fixed publisher archive can be installed with stock
+WeeWX 5:
 
-```bash
-weectl extension install https://github.com/matthewwall/weewx-mqtt/archive/master.zip
+```sh
+weectl extension install https://github.com/weewx-packages/catalog/releases/download/mqtt-publish/v1.2.0/mqtt-publish-1.2.0.tar.gz
 ```
 
-#### WeeWX 4.x (Python 2/3)
-
-```bash
-wee_extension --install https://github.com/matthewwall/weewx-mqtt/archive/master.zip
-```
+Use WeeWX's Python environment and add `--config /path/to/weewx.conf` if needed.
+This installs the publisher, not NeoWX Material. Review its dependencies and
+service settings before restarting WeeWX. The NeoWX skin also needs the broker's
+WebSocket endpoint for browser updates.
 
 ---
 
@@ -771,4 +772,3 @@ For support, open an issue at [github.com/seehase/neowx-material](https://github
 ---
 
 **Made with ❤️ for the WeeWX community**
-

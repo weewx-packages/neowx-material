@@ -1,457 +1,103 @@
 # NeoWX Material
 
-**The most modern and feature-rich skin for WeeWX weather stations**
+NeoWX Material generates a weather website from WeeWX archive data, with
+interactive ApexCharts, history tables, telemetry pages, translated labels and
+light/dark themes. Optional browser MQTT updates use a WebSocket broker;
+Open-Meteo forecasts use your station coordinates.
 
-[![Live Demo](https://img.shields.io/badge/Live-Demo-blue?style=flat-square)](https://weewx.seehausen.org/)
-[![GitHub Issues](https://img.shields.io/github/issues/seehase/neowx-material?style=flat-square)](https://github.com/seehase/neowx-material/issues)
-[![License](https://img.shields.io/github/license/seehase/neowx-material?style=flat-square)](LICENSE)
+This independently maintained distribution is version 1.73.4, based on
+[seehase/neowx-material](https://github.com/seehase/neowx-material) and the
+original [Neoground skin](https://github.com/neoground/neowx-material).
+The catalog declares WeeWX 5.x and Python 3.10 or newer.
 
-This actively maintained fork brings NeoWX Material into the modern era with **real-time MQTT updates**, **weather forecasting**, **multi-axis charts**, **collapsible grouping panels**, **comprehensive telemetry monitoring**, **comprehensive multi-language support**, and many more improvements.
+## Install and activate
 
-> **Live Demo:** [weewx.seehausen.org](https://weewx.seehausen.org/)
+Use an existing WeeWX station with working archive reports. The base skin
+uses the Python libraries already supplied with WeeWX. You do not need
+Node.js to install the published assets.
 
----
+Install the published archive with WeeWX 5's extension installer:
 
-## 🚀 Why This Fork?
-
-This is an **actively maintained** continuation of the NeoWX Material skin. The original repository has not been maintained for years, so this fork provides:
-
-✅ **Active development and bug fixes**  
-✅ **New major features** (MQTT real-time updates, weather forecasts, multi-axis charts, grouping panels, telemetry)  
-✅ **Complete multi-language support** (11 languages, all keys translated and sorted)  
-✅ **Modern features** (configurable UI, improved charts, better mobile experience)  
-✅ **Community-driven improvements**
-
----
-
-## ✨ Major Features
-
-### 📉 Multi-Y-Axis Charts
-- **Multiple independent Y-axes** on a single chart for sensors with different scales
-- Assign any observation to a left or right axis (e.g. UV Index vs. Solar Radiation)
-- Fully configurable axis titles, position (opposite side), and per-field assignment
-- Defined inline in `skin.conf` under `[[[[yaxis]]]]` and `[[[[yaxis_config]]]]` subsections
-
-### 🗂️ Collapsible Grouping Panels
-- Group cards and charts into **collapsible Material Design expansion panels**
-- Panels can be expanded or collapsed by default
-- Optional panel titles for clear labelling
-- Lay out cards and charts with `[[[sections]]]` in `skin.conf`:
-   - `items` — the ordered list of cards or charts
-   - `title` — omit it for a plain row, add it for a collapsible panel
-   - `collapsed` — `true`, `false`, or `none` for a panel that never collapses
-   - `content` — `card`, `chart`, `embedded`, `telemetry` or `telemetry_chart`
-- Sections render in the order they are written, so a panel can be followed by an ungrouped row
-- Each section starts on a new line, so grouping is meaningful even without a title
-- Panels whose items all lack data are hidden rather than drawn empty
-- Fully configurable panel header color and title color for both light and dark mode
-
-### 📡 Advanced Telemetry & Battery Monitoring
-- Dedicated **telemetry page** for station health at a glance
-- Battery status tracking for all sensors with configurable value-to-label mapping
-- Historical battery trend charts with configurable display order and chart interval
-- Signal quality monitoring (`rxCheckPercent`)
-- Per-field chart interval override — set different resolutions for different sensors
-- Customizable card and chart ordering via `telemetry` and `telemetry_chart` sections
-
-### 🔴 Real-Time MQTT Updates
-- **Live data updates** without page refresh
-- Configurable flash effects on value changes
-- Connection status indicator
-- WebSocket support for instant updates
-
-### 🌤️ Weather Forecast Integration
-- **7-day forecast** powered by [Open-Meteo](https://open-meteo.com)
-- Hourly weather icons and conditions
-- Temperature, precipitation, wind, and sunshine predictions
-- Fully customizable display
-
-### 🌍 Complete Multi-Language Support
-- **11 languages**: Catalan, Dutch, English, Finnish, French, German, Italian, Polish, Slovak, Spanish, Swedish
-- All keys translated and professionally localized
-- Easy to extend with additional languages
-
-### 🎨 Beautiful Material Design
-- Modern, clean interface
-- 20+ color schemes to choose from
-- Auto dark mode (follows system settings)
-- Responsive design for all devices
-
-### 📊 Interactive Charts
-- Zoomable and pannable charts powered by ApexCharts
-- **Multi-Y-axis support** for sensors with different value ranges
-- Configurable time ranges and data intervals
-- Wind rose visualization
-- Customizable colors and appearance
-
-### 📈 Unit-Aware Trend Indicators
-- Rising / steady / falling arrows with tooltips on **current-page** values
-- Direction is computed in a canonical unit, so trends behave identically in **metric, imperial, or any other supported unit**
-- Selectable threshold style via `trend_type`: `multi` (WMO/NWS multi-tier, default), `davis` (Davis Vantage), or `strict` (simple up/steady/down)
-- Barometric pressure shows graded tendency (slowly / rising / rapidly) with steeper and doubled arrows
-- Pick which observations show a trend with `show_trend_on`
-
-### 🔧 Highly Customizable
-- Extensive configuration options in `skin.conf`
-- Reorderable cards and charts
-- Custom embedded iFrames and images
-- Configurable hover effects and animations
-
-### 📦 Additional Features
-- Historical data archive (HTML + NOAA TXT)
-- Update notifications
-- Google Analytics / Tag Manager support
-- Almanac with celestial body tracking
-- Support for all WeeWX sensors
-
----
-
-## 📚 Documentation
-
-Comprehensive guides are available in the [`docs/`](docs/) folder:
-
-### 🔴 [MQTT Real-Time Updates Guide](docs/MQTT.md)
-Set up live data updates without page refresh. Complete guide covering:
-- MQTT broker installation (Mosquitto with Docker)
-- WeeWX MQTT extension configuration
-- WebSocket setup for browser connections
-- Sensor mapping and troubleshooting
-
-### 🔧 [Configuration Patcher Guide](docs/CONFIG-PATCHER.md)
-Never lose your settings again! Automate configuration updates with:
-- Automatic settings preservation after skin updates
-- Patch file creation and usage
-- Automated weekly updates with cron jobs
-- Real-world examples and best practices
-
-### 🔋 [Telemetry Configuration Guide](docs/TELEMETRY-CONFIG-GUIDE.md)
-Monitor all your weather station sensors:
-- Battery status tracking for multiple sensors
-- Telemetry page setup
-- Custom sensor configuration
-- Low battery alerts and monitoring
-- Configurable display order for cards and charts
-
-### ⚡ [Voltage-Based Battery Gauge Update](docs/VOLTAGE-BATTERY-GAUGE-UPDATE.md)
-How to migrate from simple battery status flags to voltage-based gauges:
-- What changed and why
-- Step-by-step migration guide
-- Configuring voltage thresholds for accurate gauge display
-
-### 📉 [Multi-Axis Charts – Usage Guide](docs/MULTI-AXIS-USAGE-GUIDE.md)
-Full guide to combining sensors with different value ranges on one chart:
-- Concept and configuration overview
-- `[[[[yaxis]]]]` and `[[[[yaxis_config]]]]` reference
-- Practical examples (UV vs. radiation, temperature vs. humidity, …)
-
-### 📋 [Multi-Axis Charts – Quick Reference](docs/MULTI-AXIS-QUICK-REFERENCE.md)
-Compact cheat-sheet for the multi-axis syntax:
-- Minimal working configuration snippets
-- All supported keys at a glance
-
-### 📈 [Trend Indicators – Usage Guide](docs/TREND-INDICATORS.md)
-How the current-page trend arrows work and how to tune them:
-- Unit-aware direction (metric / imperial / other behave identically)
-- `trend_type` styles: `multi` (WMO/NWS), `davis` (Davis Vantage), `strict`
-- Threshold tables, tooltip precision, and `show_trend_on` reference
-
-**Quick Links:**
-- [Installation](#-installation) • [Configuration](#️-configuration) • [Troubleshooting](#-contribution--support) • [Contributing](#-contribution--support)
-
----
-
-## 📥 Installation
-
-### Quick Install
-
-1. **Install the extension:**
-   ```bash
-   weectl extension install https://github.com/seehase/neowx-material/archive/refs/heads/master.zip
-   ```
-
-2. **Restart WeeWX:**
-   ```bash
-   sudo systemctl restart weewx
-   ```
-
-3. **Done!** Your new skin should be active.
-
-### Manual Skin Selection
-
-If your skin doesn't change automatically, edit `weewx.conf` and set:
-```ini
-[[neowx-material]]
-   skin = neowx-material
-   enable = true
-   HTML_ROOT = /var/www/html
+```sh
+weectl extension install https://github.com/weewx-packages/catalog/releases/download/neowx-material/v1.73.4/neowx-material-1.73.4.zip
 ```
 
-Then reload WeeWX:
-```bash
-sudo systemctl reload weewx
-```
+Use the `weectl` from your WeeWX environment. Add
+`--config /path/to/weewx.conf` when the station configuration is not found
+automatically. Package installations may require `sudo`; activate the WeeWX
+virtual environment for pip installations. Restart your WeeWX service after
+configuration, for example `sudo systemctl restart weewx` on systemd.
+The installer does not restart it for you.
 
-### Optional: Enhanced Almanac Features
+The installer copies `skins/neowx-material` and the search-list modules
+`historygenerator`, `openmeteo`, `updatecheck`, `onlinecheck` and `panelorder`
+into `bin/user`. It changes `StandardReport` to use this skin. Check the
+report explicitly before restarting:
 
-For advanced almanac features (moon phases, celestial body tracking, etc.), install the **weewx-skyfield-almanac** extension:
-
-```bash
-weectl extension install https://github.com/roe-dl/weewx-skyfield-almanac/archive/master.zip
-```
-
-This is a modern replacement for the deprecated PyEphem and provides:
-- Accurate moon phase calculations
-- Rise/set times for sun, moon, and planets
-- Celestial body positions and visibility
-- Eclipse predictions
-
-**Note:** This extension is optional and not part of the skin itself. The skin works without it, but the almanac page will have limited functionality.
-
-For more information, see: [weewx-skyfield-almanac](https://github.com/roe-dl/weewx-skyfield-almanac)
-
----
-
-## 🌍 Localization
-
-### Language Configuration
-
-Set your preferred language in `weewx.conf`:
 ```ini
 [StdReport]
-    [[NeowxMaterial]]]
-        lang = de  # Options: ca, de, en, es, fi, fr, it, nl, pl, se, sk
+    [[StandardReport]]
+        skin = neowx-material
+        enable = true
+        lang = en
+        HTML_ROOT = /var/www/html/weewx/neowx-material
 ```
 
-**Available Languages:**
-- Catalan (`ca`)
-- 🇩🇰 Dänisch (`da`)
-- 🇩🇪 German (`de`)
-- 🇬🇧 English (`en`)
-- 🇪🇸 Spanish (`es`)
-- 🇫🇮 Finnish (`fi`)
-- 🇫🇷 French (`fr`)
-- 🇮🇹 Italian (`it`)
-- 🇳🇱 Dutch (`nl`)
-- 🇵🇱 Polish (`pl`)
-- 🇸🇪 Swedish (`se`)
-- 🇸🇰 Slovak (`sk`)
+Use a directory writable by WeeWX and served by your web server. Wait for the
+next archive interval or run `weectl report run StandardReport`.
+The station driver and archive schema determine which sensor values exist.
+The skin does not provide sensor drivers.
 
-### Time & Date Formats
+## Configure the website
 
-For localized time and date formats, ensure your locale is installed:
+The installed [`skin.conf`](skins/neowx-material/skin.conf) contains the page,
+card, chart, colour and forecast settings. Use report overrides in
+`weewx.conf` where possible. To keep a larger set of skin customizations,
+use the optional [configuration patcher](docs/CONFIG-PATCHER.md).
+Run that tool yourself when needed; installation does not schedule updates.
 
-1. **Check installed locales:**
-   ```bash
-   locale -a
-   ```
+- [MQTT setup](docs/MQTT.md) covers the separate WeeWX MQTT publisher, broker
+  and browser WebSocket connection. The skin alone does not publish MQTT.
+- [Telemetry](docs/TELEMETRY-CONFIG-GUIDE.md) and
+  [voltage gauges](docs/VOLTAGE-BATTERY-GAUGE-UPDATE.md) describe battery fields.
+- [Multi-axis charts](docs/MULTI-AXIS-USAGE-GUIDE.md) and the
+  [quick reference](docs/MULTI-AXIS-QUICK-REFERENCE.md) cover chart axes.
+- [Trend indicators](docs/TREND-INDICATORS.md) explains `trend_type` and
+  `show_trend_on`.
 
-2. **Install your locale if missing:**
-   ```bash
-   # Debian/Ubuntu
-   sudo dpkg-reconfigure locales
+Language files are in [`skins/neowx-material/lang`](skins/neowx-material/lang).
+Set `lang` on the same report you enabled. Date formatting also depends on
+installed system locales. A separate Skyfield almanac extension is optional;
+its installation and ephemeris requirements belong to that project's guide.
 
-   # RHEL/CentOS
-   sudo locale-gen <locale_name>
-   ```
+Forecast retrieval, online checks and update checks can make network requests.
+External forecasts and browser MQTT need working network services. Review
+these options before publishing a station on an isolated network.
 
-3. **Configure WeeWX systemd service:**
-   Edit `/etc/systemd/system/weewx.service` and add under `[Service]`:
-   ```ini
-   [Service]
-   Environment="LANG=de_DE.UTF-8"
-   ```
+## Upgrade or remove
 
-   Then reload:
-   ```bash
-   sudo systemctl daemon-reload
-   sudo systemctl restart weewx
-   ```
+Back up `weewx.conf` and custom skin files. Install the desired fixed archive,
+reapply your settings and restart WeeWX. The patcher can help restore skin
+settings, but does not replace backups. Uninstall with
+`weectl extension uninstall neowx-material`, restore the desired
+`StandardReport` skin and restart.
 
----
+## Build styles from source
 
-## ⚙️ Configuration
+From `skins/neowx-material`, install the dependencies in its `package.json`.
+Run `npm run build-css` and `npm run build-minify-css`, or use the shipped
+Yarn `build` script. These commands rebuild Sass styles, not the WeeWX reports.
 
-All configuration is done in `skin.conf` under `[Extras]`. Here are the key areas:
+## License and credits
 
-### 🔧 Easy Configuration Updates
+The skin retains Neoground GmbH's [MIT license](LICENSE) and the work of
+seehase and contributors. Preserve the notices in bundled third-party files.
+Rubik fonts include their [SIL Open Font License](skins/neowx-material/fonts/OFL.txt).
+Weather Icons includes icon/font notices; ApexCharts' bundled license is in
+[`js/vendor/apexcharts/LICENSE`](skins/neowx-material/js/vendor/apexcharts/LICENSE).
+Open-Meteo data has its own attribution requirements. The
+[upstream demonstration](https://weewx.seehausen.org/) shows one configured site.
 
-**Never lose your settings again!** Use the Configuration Patcher to automatically apply your customizations after updates:
-
-```bash
-# Apply your custom settings
-./config_patcher.py skin.conf skin.conf.patch
-```
-
-📖 **For complete instructions**, see the [Configuration Patcher Guide](docs/CONFIG-PATCHER.md)
-
-### Basic Settings
-- **Color scheme**: Choose from 20+ Material Design colors
-- **Navigation links**: Show/hide pages in the menu
-- **Footer content**: Customize name, links, and credits
-
-### MQTT Real-Time Updates
-Enable live updates without page refresh:
-```ini
-[Extras]
-    [[MQTT]]
-        enabled = true
-        host = your-mqtt-broker.com
-        port = 9001
-        topic = "weewx/#"
-        flash_on_update = true
-        flash_color = "#00ff00"
-```
-
-📖 **For complete MQTT setup instructions**, see the [MQTT Setup Guide](docs/MQTT.md)
-
-### Weather Forecast
-Get 7-day forecasts from Open-Meteo:
-```ini
-[Extras]
-    [[Appearance]]
-        # Add "forecast" to the shipped "card" section's items (patching a
-        # section merges into the shipped id with the same name - see
-        # docs/CONFIG-PATCHER.md - so reuse "card" rather than a new id):
-        [[[sections]]]
-            [[[[card]]]]
-                items = forecast, outTemp, outHumidity, ...
-
-    [[Forecast]]
-        # Optional: Override coordinates for forecast
-        # By default, uses station coordinates from weewx.conf [Station] section
-        # Useful if you want forecast for a different location
-        latitude =
-        longitude =
-        
-        days = 7
-        show_icon = yes
-        variables = temperature, precipitation, wind, sun
-```
-
-**Coordinate Override:**
-- By default, forecast uses your weather station's coordinates from `weewx.conf`
-- Optionally specify different coordinates in `skin.conf` for forecast at another location
-- Leave empty to use station coordinates (recommended for most users)
-
-### Charts & Appearance
-- Customize chart colors, time spans, and behavior
-- Reorder cards and charts
-- Configure hover effects and animations
-- Add custom embedded content (iFrames, images)
-
-For complete configuration options, see the comments in `skin.conf`.
-
----
-
-## 🤝 Contribution & Support
-
-### Reporting Issues
-
-Found a bug or have a feature request?
-👉 [Open an issue on GitHub](https://github.com/seehase/neowx-material/issues)
-
-### Contributing
-
-We welcome contributions! Here's how you can help:
-
-1. **Translations**: Help translate to additional languages
-2. **Bug fixes**: Submit pull requests with fixes
-3. **Features**: Propose and implement new features
-4. **Documentation**: Improve this README or add guides
-
-**To contribute:**
-1. Fork this repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request to `https://github.com/seehase/neowx-material`
-
-### Adding a New Language
-
-If your language isn't supported yet:
-1. Copy an existing language file from `/lang/`
-2. Translate all keys
-3. Submit a pull request
-4. See [WeeWX Localization Guide](https://weewx.com/docs/5.1/custom/localization/) for details
-
----
-
-## 👨‍💻 Development
-
-For developers who want to contribute or customize the skin:
-
-### Setup
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/seehase/neowx-material.git
-   cd neowx-material
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-3. **Create symlink for testing:**
-   ```bash
-   ln -s $(pwd)/skins/neowx-material /etc/weewx/skins/neowx-material
-   ```
-
-### Build Scripts
-
-| Script | Description |
-|--------|-------------|
-| `yarn run build-css` | Compile SCSS to CSS |
-| `yarn run build-minify-css` | Create minified CSS |
-| `yarn run build` | Full build (CSS + minified) |
-
-### Technology Stack
-
-- **Styling**: SCSS → CSS (Material Design for Bootstrap)
-- **Charts**: [ApexCharts](https://apexcharts.com) (MIT)
-- **Icons**: [Weather Icons by Erik Flowers](https://erikflowers.github.io/weather-icons/) (MIT / SIL OFL 1.1)
-- **Date/Time**: [MomentJS](https://momentjs.com) (MIT)
-- **Forecast**: [Open-Meteo API](https://open-meteo.com) (CC BY 4.0)
-- **MQTT**: Paho MQTT JavaScript client (EPL-2.0 / BSD-3-Clause)
-
----
-
-## 📜 Credits & License
-
-### Original Work
-This skin is based on the original [NeoWX Material](https://github.com/neoground/neowx-material) by Neoground GmbH, which itself was inspired by the NeoWX skin (based on Sofaskin).
-
-### This Fork
-Maintained by [@seehase](https://github.com/seehase) and contributors.
-
-### Acknowledgments
-
-- **Tom Keffer** and the WeeWX contributors for the excellent WeeWX platform
-- **Material Design for Bootstrap (MDB)** for the design framework
-- All the contributors who have helped improve this skin
-
-### Third-Party Libraries
-
-- [ApexCharts](https://github.com/apexcharts/apexcharts.js) - MIT License
-- [MomentJS](https://github.com/moment/moment) - MIT License
-- [Weather Icons](https://github.com/erikflowers/weather-icons) - MIT / SIL OFL 1.1
-- [Open-Meteo](https://open-meteo.com) - CC BY 4.0
-
-### License
-
-This project maintains the original license from NeoWX Material.
-
----
-
-## 📞 Contact & Links
-
-- **Live Demo**: [weewx.seehausen.org](https://weewx.seehausen.org/)
-- **Issues**: [GitHub Issues](https://github.com/seehase/neowx-material/issues)
-- **Original Project**: [neoground/neowx-material](https://github.com/neoground/neowx-material) (not maintained)
-- **WeeWX**: [weewx.com](https://weewx.com)
-
----
-
-Made with ❤️ for the WeeWX community
+The skin installs a shared `user.historygenerator` module. Another skin using
+the same module name can replace it. Review that overlap before installing
+Niculskin and NeoWX Material into the same station.

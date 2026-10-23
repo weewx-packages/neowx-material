@@ -59,7 +59,7 @@ When a new version of NeoWX Material is released, update it and automatically re
 
 ```bash
 # 1. Install the latest version
-weectl extension install https://github.com/seehase/neowx-material/archive/refs/heads/master.zip
+weectl extension install https://github.com/weewx-packages/catalog/releases/download/neowx-material/v1.73.4/neowx-material-1.73.4.zip
 
 # 2. Navigate to skin directory
 cd /etc/weewx/skins/neowx-material
@@ -535,7 +535,7 @@ The patcher will leave all other settings untouched.
 
 2. **Update NeoWX Material:**
    ```bash
-   weectl extension install https://github.com/seehase/neowx-material/archive/refs/heads/master.zip
+   weectl extension install https://github.com/weewx-packages/catalog/releases/download/neowx-material/v1.73.4/neowx-material-1.73.4.zip
    ```
 
 3. **Apply your patch:**
