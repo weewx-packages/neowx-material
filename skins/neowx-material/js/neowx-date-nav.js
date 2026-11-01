@@ -102,14 +102,14 @@
         this.stopDate = parseDateIso(this.stopDateStr);
 
         var rawStartYear = parseInt(this.$hub.attr('data-start-year'), 10);
-        this.startYear = (!isNaN(rawStartYear) && rawStartYear > 1900)
-            ? rawStartYear
-            : (this.startDate ? this.startDate.getFullYear() : 1970);
+        this.startYear = this.startDate
+            ? this.startDate.getFullYear()
+            : ((!isNaN(rawStartYear) && rawStartYear > 1900) ? rawStartYear : 1970);
 
         var rawStopYear = parseInt(this.$hub.attr('data-stop-year'), 10);
-        this.stopYear = (!isNaN(rawStopYear) && rawStopYear > 1900)
-            ? rawStopYear
-            : (this.stopDate ? this.stopDate.getFullYear() : new Date().getFullYear());
+        this.stopYear = this.stopDate
+            ? this.stopDate.getFullYear()
+            : ((!isNaN(rawStopYear) && rawStopYear > 1900) ? rawStopYear : new Date().getFullYear());
 
         this.redirectTimer = null;
         this.init();
@@ -151,6 +151,7 @@
         } else if (this.$dropdown.hasClass('nwm-picker-month')) {
             this.initMonthPicker();
         }
+        this.syncNextStepperButton();
 
         // Global export for nxJumpDate and external triggers
         window.nxNavigateWithCheck = function (url) {
@@ -186,6 +187,70 @@
             this.renderMonthPicker(this.viewMonthYear);
         } else if (this.$dropdown.hasClass('nwm-picker-week') && this.viewWeekYear) {
             this.renderWeekPicker(this.viewWeekYear);
+        }
+        this.syncNextStepperButton();
+    };
+
+    // Dynamically enables the Next (>) stepper button on frozen archive pages once
+    // live.json reports a newer stopDateStr than the page's build-time stopDate.
+    DateNavController.prototype.syncNextStepperButton = function () {
+        if (!this.stopDate) return;
+        if (this.activeNav === 'current' || this.activeNav === 'live' || this.page === 'today') return;
+
+        var $nextSlot = this.$container.next('.nwm-nav-btn');
+        if (!$nextSlot.length || !$nextSlot.is('button.disabled')) return;
+
+        var nextUrl = '';
+        if (this.$dropdown.hasClass('nwm-picker-calendar')) {
+            var curDay = parseDateIso(this.contextDay);
+            if (curDay) {
+                var nextDay = new Date(curDay.getTime() + 86400000);
+                var nextDayIso = formatDateIso(nextDay);
+                if (nextDayIso <= this.stopDateStr) {
+                    nextUrl = (nextDayIso === this.stopDateStr)
+                        ? (this.basePath + 'index.html')
+                        : (this.basePath + 'archive/' + nextDay.getFullYear() + '/days/day-' + nextDayIso + '.html');
+                }
+            }
+        } else if (this.$dropdown.hasClass('nwm-picker-week')) {
+            var curWkRange = getIsoWeekRange(this.contextYear, this.contextWeek);
+            var nextWkMon = new Date(curWkRange.start.getTime() + 7 * 86400000);
+            if (formatDateIso(nextWkMon) <= this.stopDateStr) {
+                var d = new Date(Date.UTC(nextWkMon.getFullYear(), nextWkMon.getMonth(), nextWkMon.getDate()));
+                var dayNum = d.getUTCDay() || 7;
+                d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+                var isoYr = d.getUTCFullYear();
+                var yearStart = new Date(Date.UTC(isoYr, 0, 1));
+                var isoWk = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+                nextUrl = this.basePath + 'archive/' + isoYr + '/weeks/week-' + isoYr + '-' + pad2(isoWk) + '.html';
+            }
+        } else if (this.$dropdown.hasClass('nwm-picker-month')) {
+            var nextMoYr = (this.contextMonth < 12) ? this.contextYear : (this.contextYear + 1);
+            var nextMo = (this.contextMonth < 12) ? (this.contextMonth + 1) : 1;
+            var nextMoFirstIso = nextMoYr + '-' + pad2(nextMo) + '-01';
+            if (nextMoFirstIso <= this.stopDateStr) {
+                nextUrl = this.basePath + 'archive/' + nextMoYr + '/months/month-' + nextMoYr + '-' + pad2(nextMo) + '.html';
+            }
+        } else if (this.$dropdown.hasClass('nwm-picker-year')) {
+            var nextYr = this.contextYear + 1;
+            if (nextYr <= this.stopYear) {
+                nextUrl = this.basePath + 'archive/' + nextYr + '/year-' + nextYr + '.html';
+            }
+        }
+
+        if (nextUrl) {
+            var $link = $('<a>', {
+                href: nextUrl,
+                class: 'nwm-nav-btn',
+                'data-toggle': 'tooltip',
+                'data-placement': 'bottom',
+                title: 'Next',
+                'aria-label': 'Next'
+            }).append($('<i>', { class: 'mdi mdi-chevron-right' }));
+            $nextSlot.replaceWith($link);
+            if ($.fn.tooltip) {
+                $link.tooltip();
+            }
         }
     };
 
@@ -299,6 +364,8 @@
     DateNavController.prototype.initMonthPicker = function () {
         var self = this;
         this.viewMonthYear = this.contextYear;
+        // Normalize picker button label to YYYY-MM even on previously generated archive pages
+        $('#nx-picker-label').text(this.contextYear + '-' + pad2(this.contextMonth));
         this.renderMonthPicker(this.viewMonthYear);
 
         this.$dropdown.on('click', '[data-action="prev-year"]', function (e) {
@@ -743,8 +810,14 @@
         }
     };
 
-    $(function () {
+    // Run immediately if #nwm-nav-hub is already in the DOM (js.inc loads after header.inc),
+    // so the month label and picker initialize without waiting for chart scripts to finish.
+    if ($('#nwm-nav-hub').length) {
         new DateNavController();
-    });
+    } else {
+        $(function () {
+            new DateNavController();
+        });
+    }
 
 })(window.jQuery);
