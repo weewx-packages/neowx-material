@@ -56,7 +56,7 @@ except ImportError:
         filename = filename.replace('YYYY', '%Y').replace('MM', '%m').replace('DD', '%d').replace('WW', '%V')
         return dt.strftime(filename)
 
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 
 log = logging.getLogger(__name__)
 
@@ -204,6 +204,12 @@ class NeowxArchiveGenerator(weewx.cheetahgenerator.CheetahGenerator):
         first in Pass 1 ('current'), followed by SummaryByYear -> Month -> Week -> Day.
         In Pass 2 ('history'), only SummaryBy* sections are visited in coarse-to-fine order.
         """
+        # If this section is already a SummaryBy* container (e.g. [[SummaryByMonth]]),
+        # all of its child subsections (e.g. [[[month_summary]]], [[[month_NOAA]]])
+        # inherit summarize_by and should be visited in declaration order in both passes.
+        if section.get('summarize_by') in self.generator_dict:
+            return list(section.sections)
+
         non_summary = []
         summary_by_key = {k: [] for k in self.SUMMARY_PRIORITY}
         other_summary = []
@@ -224,9 +230,7 @@ class NeowxArchiveGenerator(weewx.cheetahgenerator.CheetahGenerator):
         ordered_summaries.extend(other_summary)
 
         if _pass == 'history':
-            # Include non_summary containers only if they themselves hold nested subsections
-            nested_containers = [s for s in non_summary if getattr(section[s], 'sections', None)]
-            return ordered_summaries + nested_containers
+            return ordered_summaries
         return non_summary + ordered_summaries
 
     @staticmethod
