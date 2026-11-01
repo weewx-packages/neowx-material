@@ -402,7 +402,7 @@
                             <button class="nwm-header-picker-btn" id="nx-picker-btn" type="button"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
                                     title="$gettext('select_month')">
-                                <span class="nwm-picker-text" id="nx-picker-label">$context_month_name ${context_year}</span>
+                                <span class="nwm-picker-text" id="nx-picker-label">${context_year}-${context_month}</span>
                                 <i class="mdi mdi-menu-down nwm-picker-arrow"></i>
                             </button>
                             <div class="dropdown-menu dropdown-menu-center nwm-picker-dropdown nwm-picker-month" aria-labelledby="nx-picker-btn" id="nx-picker-dropdown">
