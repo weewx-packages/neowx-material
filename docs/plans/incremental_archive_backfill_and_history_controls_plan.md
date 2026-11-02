@@ -12,6 +12,10 @@ On initial installation or with a large WeeWX database, generating every histori
 - **Idea 2 (Orthogonal `archive_start_date` Keywords + `archive_history` Granularity):**
   - Allow `archive_start_date` to accept smart keywords (`all`, `current_year`, `current_month`, `current` / `today`) in addition to `YYYY-MM-DD`.
   - Add `archive_history` to control *which* historical granularities are generated (`all`, `months_years`, `years`, `none`, or a comma-separated list like `months, years`), while always generating the **current** active week/month/year so the navbar works.
+- **Idea 3 (Version Metadata & Automatic Refresh of Outdated Historical Files):**
+  - Emit `<meta name="neowx-version" content="$Extras.version">` (alongside `<!-- NeoWX Material skin v$Extras.version -->`) in the `<head>` of every generated HTML file.
+  - Define `MIN_ARCHIVE_VERSION` per summary type (`SummaryByYear`, `SummaryByMonth`, `SummaryByWeek`, `SummaryByDay`) in `NeowxArchiveGenerator` (with optional `min_archive_version` override in `skin.conf`).
+  - When checking existing historical HTML files, read the first 1 KB to extract the file's version; if `file_version < min_required_version`, automatically queue the file for background regeneration in Pass 2 (`_pass='history'`).
 
 ---
 

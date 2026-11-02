@@ -160,11 +160,13 @@ Configure your archive horizon, granularity, and per-cycle backfill budget under
     archive_history = all
 
     # Incremental backfill limits per 5-minute report cycle (0 = unlimited)
-    archive_batch_size = 30
-    archive_max_run_time = 180
+    archive_batch_size = 50
+    archive_max_run_time = 240
 ```
 
 > **Note:** Both `archive_start_date` and `archive_history` can be combined (for example, `archive_start_date = current_year` and `archive_history = months_years`). When daily or weekly history is disabled via `archive_history`, the current active week/month/year are still generated for the navbar, and the `<` stepper buttons on disabled scales are automatically deactivated.
+>
+> **Automatic Version-Based Refresh:** Every generated HTML page embeds `<meta name="neowx-version" content="X.Y.Z">`. When a future release updates an archive template and bumps `MIN_ARCHIVE_VERSION` in `bin/user/neowx_archive.py` (or if you set `min_archive_version` / `min_month_version` / `min_day_version` under `[CheetahGenerator]`), existing historical HTML files with a lower version are automatically refreshed in the background during Pass 2.
 
 ### Header Navigation & Stepper Pickers
 

@@ -6,6 +6,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta http-equiv="x-ua-compatible" content="ie=edge">
 <!-- NeoWX Material skin v$Extras.version -->
+<meta name="generator" content="neowx-material $Extras.version">
+<meta name="neowx-version" content="$Extras.version">
 
 #if not $varExists('base_path')
     #set $base_path = ''

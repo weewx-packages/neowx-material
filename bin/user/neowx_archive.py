@@ -56,7 +56,7 @@ except ImportError:
         filename = filename.replace('YYYY', '%Y').replace('MM', '%m').replace('DD', '%d').replace('WW', '%V')
         return dt.strftime(filename)
 
-VERSION = "1.1.1"
+VERSION = "1.2.0"
 
 log = logging.getLogger(__name__)
 
@@ -114,6 +114,85 @@ class NeowxArchiveGenerator(weewx.cheetahgenerator.CheetahGenerator):
 
     # Priority ordering for SummaryBy* sections (coarse-to-fine)
     SUMMARY_PRIORITY = ('SummaryByYear', 'SummaryByMonth', 'SummaryByWeek', 'SummaryByDay')
+
+    # Minimum skin version required per archive summary type.
+    # Bump a specific key here when a release modifies that template's markup/layout
+    # so existing historical HTML files with a lower embedded version are automatically
+    # refreshed in the background during Pass 2 ('history').
+    MIN_ARCHIVE_VERSION = {
+        'SummaryByYear':  '2.0.0',
+        'SummaryByMonth': '2.0.0',
+        'SummaryByWeek':  '2.0.0',
+        'SummaryByDay':   '2.0.0',
+    }
+
+    _VERSION_META_RE = re.compile(
+        rb'(?:<meta\s+name=["\']neowx-version["\']\s+content=["\']v?([^"\']+)["\']'
+        rb'|<!--\s*NeoWX Material skin v([^\s-]+)\s*-->)',
+        re.IGNORECASE
+    )
+
+    @staticmethod
+    def _parse_version_tuple(ver_str):
+        """Parses a version string like '2.0.3' or 'v2.0.3' into a comparable int tuple (2, 0, 3)."""
+        if not ver_str:
+            return (0, 0, 0)
+        cleaned = str(ver_str).strip().lstrip('vV')
+        if not cleaned:
+            return (0, 0, 0)
+        parts = []
+        for token in re.split(r'[._-]', cleaned):
+            m = re.match(r'^(\d+)', token)
+            if m:
+                parts.append(int(m.group(1)))
+            else:
+                break
+        while len(parts) < 3:
+            parts.append(0)
+        return tuple(parts)
+
+    @classmethod
+    def _extract_file_version(cls, filepath):
+        """Reads the first 1 KB of an HTML file and extracts its embedded skin version tuple."""
+        try:
+            with open(filepath, 'rb') as fd:
+                head = fd.read(1024)
+        except OSError:
+            return (0, 0, 0)
+        m = cls._VERSION_META_RE.search(head)
+        if not m:
+            return (0, 0, 0)
+        raw_ver = (m.group(1) or m.group(2) or b'').decode('ascii', errors='ignore')
+        return cls._parse_version_tuple(raw_ver)
+
+    @classmethod
+    def _get_min_required_version(cls, summarize_by, report_dict):
+        """Returns the effective minimum required version tuple for summarize_by,
+        combining MIN_ARCHIVE_VERSION in code with optional skin.conf overrides.
+        """
+        code_min = cls._parse_version_tuple(cls.MIN_ARCHIVE_VERSION.get(summarize_by, '0.0.0'))
+        conf_global = cls._parse_version_tuple(report_dict.get('min_archive_version', ''))
+        per_type_key = {
+            'SummaryByYear': 'min_year_version',
+            'SummaryByMonth': 'min_month_version',
+            'SummaryByWeek': 'min_week_version',
+            'SummaryByDay': 'min_day_version',
+        }.get(summarize_by)
+        conf_type = cls._parse_version_tuple(report_dict.get(per_type_key, '')) if per_type_key else (0, 0, 0)
+        return max(code_min, conf_global, conf_type)
+
+    @classmethod
+    def _needs_version_refresh(cls, filepath, summarize_by, report_dict):
+        """Returns True if an existing HTML archive file has a lower embedded skin version
+        than the minimum required version for its summary type.
+        """
+        if not filepath.lower().endswith('.html'):
+            return False
+        min_req = cls._get_min_required_version(summarize_by, report_dict)
+        if min_req <= (0, 0, 0):
+            return False
+        file_ver = cls._extract_file_version(filepath)
+        return file_ver < min_req
 
     def __init__(self, config_dict, skin_dict, *args, **kwargs):
         super(NeowxArchiveGenerator, self).__init__(config_dict, skin_dict, *args, **kwargs)
@@ -385,8 +464,8 @@ class NeowxArchiveGenerator(weewx.cheetahgenerator.CheetahGenerator):
         else:
             spans_to_process = [TimeSpan(start_ts, stop_ts)]
 
-        batch_size = to_int(report_dict.get('archive_batch_size', 30))
-        max_run_time = to_int(report_dict.get('archive_max_run_time', 180))
+        batch_size = to_int(report_dict.get('archive_batch_size', 50))
+        max_run_time = to_int(report_dict.get('archive_max_run_time', 240))
 
         html_root = os.path.join(self.config_dict['WEEWX_ROOT'], report_dict['HTML_ROOT'])
 
@@ -415,15 +494,23 @@ class NeowxArchiveGenerator(weewx.cheetahgenerator.CheetahGenerator):
 
             _fullname = os.path.join(eval_dest_dir, _filename)
 
-            # Skip summary files outside the active timespan that already exist on disk
+            # Skip summary files outside the active timespan that already exist on disk,
+            # unless their embedded skin version is older than the minimum required version.
+            file_exists = os.path.exists(_fullname)
+            needs_refresh = (
+                is_summary
+                and file_exists
+                and self._needs_version_refresh(_fullname, summarize_by, report_dict)
+            )
             if is_summary \
-                    and os.path.exists(_fullname) \
-                    and not timespan.includesArchiveTime(stop_ts):
+                    and file_exists \
+                    and not timespan.includesArchiveTime(stop_ts) \
+                    and not needs_refresh:
                 continue
 
-            # Staleness check
+            # Staleness check (bypassed if file requires a version upgrade refresh)
             stale = to_int(report_dict.get('stale_age'))
-            if stale is not None:
+            if stale is not None and not needs_refresh:
                 t_now = time.time()
                 try:
                     last_mod = os.path.getmtime(_fullname)
